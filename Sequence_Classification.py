@@ -54,7 +54,8 @@ for word, i in word_index.items():
 # create the model
 embedding_vector_length = 32
 model = Sequential()
-model.add(Embedding(len(word_index) + 1, EMBEDDING_DIM, input_length=max_review_length))
+model.add(Embedding(len(word_index) + 1, EMBEDDING_DIM, weights=[embedding_matrix],
+          input_length=max_review_length, trainable=False))
 model.add(LSTM(100))
 model.add(Dense(1, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
