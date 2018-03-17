@@ -13,16 +13,26 @@ numpy.random.seed(7)
 data_set = loadData()
 train, validate, test = getTrainTest(data_set)
 
+print("Before")
+print(type(train['x_term']))
+print(train['x_term'])
+print(train['x_term'].shape)
+print(train['y_term'].shape)
+
 # truncate and pad input sequences
 max_review_length = 1000
 X_train = sequence.pad_sequences(train['x_term'], maxlen=max_review_length)
 X_validate = sequence.pad_sequences(validate['x_term'], maxlen=max_review_length)
 X_test = sequence.pad_sequences(test['x_term'], maxlen=max_review_length)
 
+print("After")
+print(X_train)
+print(X_train.shape)
+
+
 # create the model
-embedding_vector_length = 32
 model = Sequential()
-model.add(Embedding(train['x_term'].shape[0], 1000, input_length=max_review_length))
+model.add(Embedding(train['x_term'].shape[0], 100, input_length=max_review_length))
 model.add(LSTM(100))
 model.add(Dense(1, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])

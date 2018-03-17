@@ -62,7 +62,11 @@ def getTrainTest(df):
 def main():
     data_set = loadData()
     train, validate, test = getTrainTest(data_set)
-    print(validate['x_term'])
+    count = 5
+
+    # for x in range(count):
+    print(type(train["x_term"].as_matrix(columns=None)))
+
     pass
 
 
