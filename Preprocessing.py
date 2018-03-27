@@ -7,20 +7,6 @@ import numpy as np
 import spacy
 
 
-def loadGloVe():
-    """
-    Loads the GloVe embeddings to memory for easy access.
-    Makes use of spacey's Glove binaries.
-    Usage:
-        python -m spacy download en_vectors_web_lg
-    :return: Spacy object
-    """
-    print("Loading GloVe vectors to memory...")
-    nlp = spacy.load('en_vectors_web_lg')
-    print("GloVe Data Loaded!")
-    return nlp
-
-
 def loadData():
     """
     Takes a csv file and outputs a pandas dataframe.
@@ -47,25 +33,27 @@ def getTrainTest(df):
     :param testRate: Percentage of dataframe to be set aside for test data
     :return:
     """
-    nlp = loadGloVe()
     df["y_term"] = df.apply(__rowToVec, axis=1).apply(np.array)
+    # df["y_term"] = df["Report"]
 
-    df["x_term"] = df["content"].apply(lambda c: [token.vector for token in nlp(c)])
+    df["x_term"] = df["content"]
     df = df[df["x_term"].map(len) < 1000] # Remove vectors which have higher dimentions
 
     # Split dataframe as a random sample to 60:20:20 as train:validate:test set.
-    train, validate, test = np.split(df.sample(frac=1), [int(.6 * len(df)), int(.8 * len(df))])
+    # train, validate, test = np.split(df.sample(frac=1), [int(.6 * len(df)), int(.8 * len(df))])
+    msk = np.random.rand(len(df)) < 0.8
+    train = df[msk]
+    test = df[~msk]
 
-    return train, validate, test
+    return train, test
 
 
 def main():
     data_set = loadData()
-    train, validate, test = getTrainTest(data_set)
-    count = 5
+    train, test = getTrainTest(data_set)
 
-    # for x in range(count):
-    print(type(train["x_term"].as_matrix(columns=None)))
+    print(len(train))
+    print(len(test))
 
     pass
 
