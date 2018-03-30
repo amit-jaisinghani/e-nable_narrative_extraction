@@ -22,6 +22,8 @@ def loadData():
 
 
 def __rowToVec(row):
+    # outputVector = ([row["Report"]], [row["Device"]], [row["Delivery"]], [row["Progress"]], [row["becoming_member"]],
+    #                 [row["attempt_action"]], [row["Activity"]], [row["Other"]])
     outputVector = (row["Report"], row["Device"], row["Delivery"], row["Progress"], row["becoming_member"],
                     row["attempt_action"], row["Activity"], row["Other"])
     return outputVector
@@ -41,9 +43,9 @@ def getTrainTest(df):
 
     # Split dataframe as a random sample to 60:20:20 as train:validate:test set.
     # train, validate, test = np.split(df.sample(frac=1), [int(.6 * len(df)), int(.8 * len(df))])
-    msk = np.random.rand(len(df)) < 0.8
-    train = df[msk]
-    test = df[~msk]
+
+    train = df.sample(frac=0.8, random_state=200)
+    test = df.drop(train.index)
 
     return train, test
 
@@ -52,8 +54,8 @@ def main():
     data_set = loadData()
     train, test = getTrainTest(data_set)
 
-    print(len(train))
-    print(len(test))
+    print(train["x_term"])
+    print(train["y_term"])
 
     pass
 

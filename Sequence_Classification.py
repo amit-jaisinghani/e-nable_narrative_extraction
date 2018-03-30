@@ -8,9 +8,12 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 
 # define documents
+from keras.utils import to_categorical
+from numpy import asarray, zeros
+
 from Preprocessing import *
 
-latent_dim = 256
+latent_dim = 100
 batch_size = 64
 epochs = 1
 
@@ -23,28 +26,41 @@ num_encoder_tokens = len(t.word_index) + 1
 
 # integer encode the documents
 encoded_docs = t.texts_to_sequences(train['x_term'])
+print(encoded_docs)
 
 # pad documents to a max length of 4 words
 max_length = 1000
 padded_docs = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 print(padded_docs)
 
+# print(train["y_term"])
+# labels = to_categorical(train["y_term"])
 labels = train["y_term"]
 num_decoder_tokens = 8
 print(labels)
 
-print('Number of samples:', len(train))
-print('Number of unique input tokens:', num_encoder_tokens)
-print('Number of unique output tokens:', num_decoder_tokens)
-print('Latent dimensions:', latent_dim)
-print(type(padded_docs))
-print(padded_docs.shape)
-print(type(labels))
-print(labels.shape)
+
+# load the whole embedding into memory
+embeddings_index = dict()
+f = open('data/glove.6B.100d.txt')
+for line in f:
+	values = line.split()
+	word = values[0]
+	coefs = asarray(values[1:], dtype='float32')
+	embeddings_index[word] = coefs
+f.close()
+print('Loaded %s word vectors.' % len(embeddings_index))
+
+# create a weight matrix for words in training docs
+embedding_matrix = zeros((num_encoder_tokens, 100))
+for word, i in t.word_index.items():
+	embedding_vector = embeddings_index.get(word)
+	if embedding_vector is not None:
+		embedding_matrix[i] = embedding_vector
 
 # Define an input sequence and process it.
 encoder_inputs = Input(shape=(None,))
-encoder_embedding_layer = Embedding(num_encoder_tokens, latent_dim)(encoder_inputs)
+encoder_embedding_layer = Embedding(num_encoder_tokens, latent_dim, weights=[embedding_matrix], trainable=False)(encoder_inputs)
 encoder_lstm_layer, state_h, state_c = LSTM(latent_dim, return_state=True)(encoder_embedding_layer)
 encoder_states = [state_h, state_c]
 
