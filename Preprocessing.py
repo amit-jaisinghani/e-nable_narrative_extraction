@@ -51,12 +51,14 @@ def getTrainTest(df):
 
 
 def main():
-    data_set = loadData()
-    train, test = getTrainTest(data_set)
+    # data_set = loadData()
+    # train, test = getTrainTest(data_set)
+    #
+    # print(train["x_term"])
+    # print(train["y_term"])
 
-    print(train["x_term"])
-    print(train["y_term"])
-
+    output = np.expand_dims(np.vstack([0, 0 ,1 , 1]), 1)
+    print(output)
     pass
 
 
