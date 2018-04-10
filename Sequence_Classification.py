@@ -10,18 +10,18 @@ from numpy import asarray, zeros
 from Preprocessing import *
 
 latent_dim = 100
-batch_size = 1
-epochs = 2
+batch_size = 15
+epochs = 8
 
 data_set = loadData()
-train, test = getTrainTest(data_set)
+train = getTrainTest(data_set)
 # prepare tokenizer
 t = Tokenizer()
-t.fit_on_texts(train['x_term'])
+t.fit_on_texts(train['content'])
 num_encoder_tokens = len(t.word_index) + 1
 
 # integer encode the documents
-encoded_docs = t.texts_to_sequences(train['x_term'])
+encoded_docs = t.texts_to_sequences(train['content'])
 print(encoded_docs)
 
 # pad documents to a max length of 4 words
@@ -29,7 +29,7 @@ max_length = 1000
 padded_docs = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 print(padded_docs)
 
-labels = np.expand_dims(np.vstack(train["y_term"].values), 1)
+labels = np.expand_dims(np.vstack(train["labels"].values), 1)
 num_decoder_tokens = 8
 print(labels)
 
@@ -67,7 +67,7 @@ decoder_outputs = Dense(num_decoder_tokens, activation='softmax')(decoder_lstm_l
 model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 
 # Compile & run training
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 # Note that `decoder_target_data` needs to be one-hot encoded,
 # rather than sequences of integers like `decoder_input_data`!
 

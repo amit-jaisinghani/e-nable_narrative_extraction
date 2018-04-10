@@ -13,7 +13,7 @@ def loadData():
     :param csvpath:
     :return:
     """
-    csvpath = "./data/labelled_data/akshai_labels.csv"
+    csvpath = "./data/train.csv"
     columns = ["content", "Report", "Device", "Delivery", "Progress",
              "becoming_member", "attempt_action" , "Activity", "Other"]
 
@@ -22,8 +22,6 @@ def loadData():
 
 
 def __rowToVec(row):
-    # outputVector = ([row["Report"]], [row["Device"]], [row["Delivery"]], [row["Progress"]], [row["becoming_member"]],
-    #                 [row["attempt_action"]], [row["Activity"]], [row["Other"]])
     outputVector = (row["Report"], row["Device"], row["Delivery"], row["Progress"], row["becoming_member"],
                     row["attempt_action"], row["Activity"], row["Other"])
     return outputVector
@@ -35,19 +33,18 @@ def getTrainTest(df):
     :param testRate: Percentage of dataframe to be set aside for test data
     :return:
     """
-    df["y_term"] = df.apply(__rowToVec, axis=1).apply(np.array)
+    df["labels"] = df.apply(__rowToVec, axis=1).apply(np.array)
     # df["y_term"] = df["Report"]
 
-    df["x_term"] = df["content"]
-    df = df[df["x_term"].map(len) < 1000] # Remove vectors which have higher dimentions
+    df = df[df["content"].map(len) < 1000]  # Remove vectors which have higher dimentions
 
     # Split dataframe as a random sample to 60:20:20 as train:validate:test set.
     # train, validate, test = np.split(df.sample(frac=1), [int(.6 * len(df)), int(.8 * len(df))])
 
-    train = df.sample(frac=0.8, random_state=200)
-    test = df.drop(train.index)
+    # train = df.sample(frac=0.8, random_state=200)
+    # test = df.drop(train.index)
 
-    return train, test
+    return df
 
 
 def main():
@@ -57,7 +54,7 @@ def main():
     # print(train["x_term"])
     # print(train["y_term"])
 
-    output = np.expand_dims(np.vstack([0, 0 ,1 , 1]), 1)
+    output = np.expand_dims(np.vstack([0, 0, 1, 1]), 1)
     print(output)
     pass
 
