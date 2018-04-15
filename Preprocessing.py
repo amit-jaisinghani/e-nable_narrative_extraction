@@ -29,7 +29,8 @@ def get_train_validate_test_dataset(max_length):
 
 
 def main():
-    get_train_validate_test_dataset(1000)
+    training_dataset, validate_dataset, test_dataset = get_train_validate_test_dataset(1000)
+    print(training_dataset["labels"])
     pass
 
 
