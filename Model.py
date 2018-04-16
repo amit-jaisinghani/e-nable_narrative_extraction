@@ -49,7 +49,7 @@ def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding
     model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 
     # Compile & run training
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='Adagrad', loss='categorical_crossentropy', metrics=['accuracy'])
     # Note that `decoder_target_data` needs to be one-hot encoded,
     # rather than sequences of integers like `decoder_input_data`!
 

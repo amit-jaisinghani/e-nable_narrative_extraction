@@ -21,7 +21,7 @@ def get_encoded_padded_content(tokenizer, content, max_length):
 
 # main script
 LATENT_DIM = 100
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 EPOCHS = 4
 max_encoder_seq_length = 1000
 
@@ -80,20 +80,16 @@ for i, inp in enumerate(training_dataset['labels']):
 model, encoder_model, decoder_model = get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, sys.argv[1],
                                                 LATENT_DIM)
 
-# Compile & run training
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-# Note that `decoder_target_data` needs to be one-hot encoded,
-# rather than sequences of integers like `decoder_input_data`!
 
 model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
           batch_size=BATCH_SIZE,
           epochs=EPOCHS)
 
 
-def decode_sequence(input_seq):
+def decode_sequence(input_sequence):
     # Encode the input as state vectors.
 
-    states_value = encoder_model.predict(input_seq)
+    states_value = encoder_model.predict(input_sequence)
 
     # Generate empty target sequence of length 1.
     target_seq = np.zeros((1, 1, num_decoder_tokens))
@@ -103,19 +99,18 @@ def decode_sequence(input_seq):
     # Sampling loop for a batch of sequences
     # (to simplify, here we assume a batch of size 1).
     stop_condition = False
-    decoded_sentence = ''
+    decoded_sentence_buf = ''
     while not stop_condition:
-        output_tokens, h, c = decoder_model.predict(
-            [target_seq] + states_value)
+        output_tokens, h, c = decoder_model.predict([target_seq] + states_value)
         # Sample a token
         sampled_token_index = np.argmax(output_tokens[0, -1, :])
 
         sampled_char = rv_target_characters[sampled_token_index]
-        decoded_sentence += sampled_char
+        decoded_sentence_buf += sampled_char + '\t'
 
         # Exit condition: either hit max length
         # or find stop character.
-        if (sampled_char == '\n' or len(decoded_sentence) > max_decoder_seq_length):
+        if sampled_char == '\n' or len(decoded_sentence_buf) > max_decoder_seq_length:
             stop_condition = True
 
         # Update the target sequence (of length 1).
@@ -125,7 +120,7 @@ def decode_sequence(input_seq):
         # Update states
         states_value = [h, c]
 
-    return decoded_sentence
+    return decoded_sentence_buf
 
 
 # Now Preparing test the data
@@ -134,7 +129,7 @@ validate_posts = get_encoded_padded_content(tokenizer, validate_dataset['content
 model_output = []
 for seq_index in range(len(validate_dataset['content'])):
     input_seq = validate_posts[seq_index: seq_index + 1]
-    decoded_sentence = decode_sequence([input_seq])
+    decoded_sentence = decode_sequence(input_seq)
     decoded_sentence = " ".join(decoded_sentence.split("\t"))
     print(decoded_sentence)
     model_output.append(decoded_sentence[0])
