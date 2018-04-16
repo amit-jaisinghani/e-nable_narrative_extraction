@@ -103,7 +103,7 @@ def decode_sequence(input_seq):
         # Sample a token
         sampled_token_index = np.argmax(output_tokens[0, -1, :])
         sampled_char = rv_target_characters[sampled_token_index]
-        decoded_sentence += sampled_char
+        decoded_sentence += sampled_char + ", "
 
         # Exit condition: either hit max length
         # or find stop character.
@@ -135,10 +135,10 @@ model_output = []
 for seq_index in range(len(validate_padded_docs)):
     input_seq = validate_padded_docs[seq_index:seq_index + 1]
     decoded_sentence = decode_sequence(input_seq)
-    # d = list(decoded_sentence.split(","))
-    # decoded_sentence = ",".join(list(set(d)))
-    # decoded_sentence = "".join(decoded_sentence.split("\t"))
-    # model_output.append(decoded_sentence)
+    d = list(decoded_sentence.split(","))
+    decoded_sentence = ",".join(list(set(d)))
+    decoded_sentence = "".join(decoded_sentence.split("\t"))
+    model_output.append(decoded_sentence)
     print("decoded sentence ", decoded_sentence)
 
 # print(model_output)
