@@ -10,8 +10,24 @@ def load_data(file):
 
 
 def row_to_vec(row):
-    outputVector = (1, row["Report"], row["Device"], row["Delivery"], row["Progress"], row["becoming_member"],
-                    row["attempt_action"], row["Activity"], row["Other"], 1)
+    outputVector = ["\t"]
+    if row["Report"] == 1:
+        outputVector.append("Report")
+    if row["Device"] == 1:
+        outputVector.append("Device")
+    if row["Delivery"] == 1:
+        outputVector.append("Delivery")
+    if row["Progress"] == 1:
+        outputVector.append("Progress")
+    if row["becoming_member"] == 1:
+        outputVector.append("becoming_member")
+    if row["attempt_action"] == 1:
+        outputVector.append("attempt_action")
+    if row["Activity"] == 1:
+        outputVector.append("Activity")
+    if row["Other"] == 1:
+        outputVector.append("Other")
+    outputVector.append("\n")
     return outputVector
 
 
