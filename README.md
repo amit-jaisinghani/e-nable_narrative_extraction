@@ -13,7 +13,7 @@ This repo contains a TensorFlow multi-class classifier which classifies Google p
 ## Setting up the environment
 
 ### Prequisites
-* TensorFlow
+* Keras
 * pandas
 * numpy
 
