@@ -1,11 +1,8 @@
 import sys
-import numpy as np
-from keras.callbacks import EarlyStopping
-from keras.optimizers import RMSprop
 
+import numpy as np
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
-from matplotlib import pyplot
 
 from Model import get_model
 from Preprocessing import get_train_validate_test_dataset
@@ -23,10 +20,7 @@ def get_encoded_padded_content(tokenizer, content, max_length):
 
 
 # main script
-LATENT_DIM = 100
-BATCH_SIZE = 5
-EPOCHS = 4
-max_encoder_seq_length = 1000
+max_encoder_seq_length = 500
 num_decoder_tokens = 8
 
 # fetch data sets
@@ -46,17 +40,11 @@ decoder_input_data = np.expand_dims(np.vstack(training_dataset["labels"].values)
 # print(decoder_input_data[0])
 
 model, encoder_model, decoder_model = get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, sys.argv[1],
-                                                LATENT_DIM)
+                                                encoder_input_data, decoder_input_data)
 
-# Compile & run training
-model.compile(loss='binary_crossentropy', optimizer=RMSprop(lr = 0.001), metrics=['accuracy'])
-# Note that `decoder_target_data` needs to be one-hot encoded,
-# rather than sequences of integers like `decoder_input_data`!
-
-model.fit([encoder_input_data, decoder_input_data], decoder_input_data,
-          batch_size=BATCH_SIZE, epochs=EPOCHS, validation_split=0.2)
 
 encoder_input_test_data = get_encoded_padded_content(tokenizer, test_dataset['content'], max_encoder_seq_length)
+decoder_input_test_data = np.expand_dims(np.vstack(test_dataset["labels"].values), 1)
 
 
 def decode_sequence(input_seq):
