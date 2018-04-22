@@ -23,13 +23,12 @@ def apply_filters(df, max_length):
 
 def get_train_validate_test_dataset(max_length):
     training_dataset = apply_filters(load_data("./data/train.csv"), max_length)
-    validate_dataset = apply_filters(load_data("./data/validate.csv"), max_length)
     test_dataset = apply_filters(load_data("./data/test.csv"), max_length)
-    return training_dataset, validate_dataset, test_dataset
+    return training_dataset, test_dataset
 
 
 def main():
-    training_dataset, validate_dataset, test_dataset = get_train_validate_test_dataset(1000)
+    training_dataset, test_dataset = get_train_validate_test_dataset(1000)
     print(training_dataset["labels"])
     pass
 

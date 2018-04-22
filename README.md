@@ -1,9 +1,35 @@
-# eNable_narrative_extraction
+# e-NABLE multi-class classifier
 
-Data analysis for e-nable
+This repo contains a TensorFlow multi-class classifier which classifies Google posts from e-NABLE communitites into the following classes.
+* Reporting
+* Device
+* Delivery
+* Progress
+* Becoming member
+* Attempt Action
+* Activity
+* Other
 
-Preprocessing.py loads the labelled data in Pandas data frame. 
-Sequence_Classification.py uses this load data to train model and test its accuracy.
+## Setting up the environment
 
-How to run the code:
-Preprocessing.py contains path to the labelled data. This path needs to be updated and run Sequence_Classification.py to execute program.
+### Prequisites
+* TensorFlow
+* pandas
+* numpy
+
+To create the environment with the above prequisites run
+```bash
+conda env create -f environment.yml
+```
+
+**Note**: This installs the GPU version of TensorFlow. If it's the CPU version that desire change '_tensorfow-gpu_' to '_tensorflow_' in the environment.yml file.
+
+## Running the code
+
+```bash
+$ source activate enable-multiclassifier-env
+
+$ python main.py
+```
+
+## Summary

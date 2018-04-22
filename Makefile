@@ -5,7 +5,7 @@ OUTPUT_FILE=output.txt
 all: data/train.csv output.txt
 
 data/train.csv:
-	python SplitData.py ${LABEL_FILE}
+	python Split_data.py ${LABEL_FILE}
 
 output.txt: data/train.csv
-	python Sequence_Classification.py ${GLOVE_EMBEDDING_FILE} >> ${OUTPUT_FILE}
+	python Classification_using_seq2seq.py ${GLOVE_EMBEDDING_FILE} >> ${OUTPUT_FILE}
