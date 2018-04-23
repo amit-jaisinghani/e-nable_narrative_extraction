@@ -29,7 +29,7 @@ conda env create -f environment.yml
 ```bash
 $ source activate enable-multiclassifier-env
 
-$ python main.py
+$ makefile
 ```
 
 ## Summary
