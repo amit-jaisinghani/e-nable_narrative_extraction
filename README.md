@@ -31,5 +31,3 @@ $ source activate enable-multiclassifier-env
 
 $ python main.py
 ```
-
-## Summary
