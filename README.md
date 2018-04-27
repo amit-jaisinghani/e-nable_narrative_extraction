@@ -24,6 +24,13 @@ conda env create -f environment.yml
 
 **Note**: This installs the GPU version of TensorFlow. If it's the CPU version that desire change '_tensorfow-gpu_' to '_tensorflow_' in the environment.yml file.
 
+### Required files
+* Glove 100d embeddings
+To download and extract glove.6B.100d.txt file
+```bash
+sudo wget http://nlp.stanford.edu/data/glove.6B.zip && unzip -j glove.6B.zip glove.6B.100d.txt && sudo rm glove.6B.zip
+```
+
 ## Running the code
 
 ```bash
