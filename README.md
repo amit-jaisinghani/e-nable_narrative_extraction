@@ -34,7 +34,7 @@ sudo wget http://nlp.stanford.edu/data/glove.6B.zip && unzip -j glove.6B.zip glo
 ## Running the code
 
 ```bash
-$ source activate enable-multiclassifier-env
+$ source activate py35
 
 $ make
 ```
