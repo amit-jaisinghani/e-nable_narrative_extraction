@@ -36,5 +36,5 @@ sudo wget http://nlp.stanford.edu/data/glove.6B.zip && unzip -j glove.6B.zip glo
 ```bash
 $ source activate enable-multiclassifier-env
 
-$ makefile
+$ make
 ```
