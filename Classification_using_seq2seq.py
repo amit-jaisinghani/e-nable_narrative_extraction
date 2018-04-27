@@ -20,7 +20,7 @@ def get_encoded_padded_content(tokenizer, content, max_length):
 
 
 # main script
-max_encoder_seq_length = 500
+max_encoder_seq_length = 1000
 num_decoder_tokens = 8
 
 # fetch data sets

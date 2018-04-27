@@ -31,5 +31,3 @@ $ source activate enable-multiclassifier-env
 
 $ makefile
 ```
-
-## Summary

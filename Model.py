@@ -7,7 +7,7 @@ from numpy import asarray, zeros
 def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding_file,
               encoder_input_data, decoder_input_data):
     BATCH_SIZE = 1
-    EPOCHS = 8
+    EPOCHS = 2
     LATENT_DIM = 100
 
     # GLOVE EMBEDDING
@@ -45,10 +45,10 @@ def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding
     # Set up the decoder, using `encoder_states` as initial state.
     decoder_inputs = Input(shape=(None, num_decoder_tokens))
     decoder_lstm_layer = LSTM(num_decoder_tokens, return_sequences=True)(decoder_inputs, initial_state=encoder_states)
-    decoder_dense_hidden_layer = Dense(num_decoder_tokens, activation='relu')(decoder_lstm_layer)
-    decoder_dropout_layer = Dropout(0.5)(decoder_dense_hidden_layer)
+    # decoder_dense_hidden_layer = Dense(num_decoder_tokens, activation='relu')(decoder_lstm_layer)
+    # decoder_dropout_layer = Dropout(0.5)(decoder_dense_hidden_layer)
     decoder_dense = Dense(num_decoder_tokens, activation='sigmoid')
-    decoder_outputs = decoder_dense(decoder_dropout_layer)
+    decoder_outputs = decoder_dense(decoder_lstm_layer)
 
     # MODEL COMPILATION
 
@@ -57,11 +57,14 @@ def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding
     model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 
     # Compile & run training
-    model.compile(loss='mean_squared_error', optimizer=RMSprop(lr=0.0001), metrics=['accuracy'])
+    model.compile(loss='mean_squared_error', optimizer="adam", metrics=['accuracy'])
+    # model.compile(loss='mean_squared_error', optimizer=RMSprop(lr=0.0001), metrics=['accuracy'])
     # Note that `decoder_target_data` needs to be one-hot encoded,
     # rather than sequences of integers like `decoder_input_data`!
 
-    model.fit([encoder_input_data, decoder_input_data], decoder_input_data,
+    decoder_input_data_zeros = zeros((787, 1, num_decoder_tokens))
+
+    model.fit([encoder_input_data, decoder_input_data_zeros], decoder_input_data,
               batch_size=BATCH_SIZE, epochs=EPOCHS, validation_split=0.2)
 
     # INFERENCE MODEL
