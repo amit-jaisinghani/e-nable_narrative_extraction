@@ -1,13 +1,12 @@
 from keras import Input, Model
-from keras.layers import Embedding, LSTM, Dense, Dropout
-from keras.optimizers import RMSprop
+from keras.layers import Embedding, LSTM, Dense
 from numpy import asarray, zeros
 
 
 def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding_file,
-              encoder_input_data, decoder_input_data):
-    BATCH_SIZE = 1
-    EPOCHS = 2
+              encoder_input_data, decoder_input_data, decoder_target_data):
+    BATCH_SIZE = 4
+    EPOCHS = 12
     LATENT_DIM = 100
 
     # GLOVE EMBEDDING
@@ -37,18 +36,20 @@ def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding
     encoder_inputs = Input(shape=(None,))
     encoder_embedding_layer = Embedding(num_encoder_tokens, LATENT_DIM, weights=[embedding_matrix], trainable=False)(
         encoder_inputs)
-    encoder_lstm_layer, state_h, state_c = LSTM(num_decoder_tokens, return_state=True)(encoder_embedding_layer)
+    encoder_lstm_layer, state_h, state_c = LSTM(LATENT_DIM, return_state=True)(encoder_embedding_layer)
     encoder_states = [state_h, state_c]
 
     # DECODER MODEL
 
     # Set up the decoder, using `encoder_states` as initial state.
     decoder_inputs = Input(shape=(None, num_decoder_tokens))
-    decoder_lstm_layer = LSTM(num_decoder_tokens, return_sequences=True)(decoder_inputs, initial_state=encoder_states)
-    # decoder_dense_hidden_layer = Dense(num_decoder_tokens, activation='relu')(decoder_lstm_layer)
-    # decoder_dropout_layer = Dropout(0.5)(decoder_dense_hidden_layer)
+    # We set up our decoder to return full output sequences,
+    # and to return internal states as well. We don't use the
+    # return states in the training model, but we will use them in inference.
+    decoder_lstm = LSTM(LATENT_DIM, return_sequences=True, return_state=True)
+    decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
     decoder_dense = Dense(num_decoder_tokens, activation='sigmoid')
-    decoder_outputs = decoder_dense(decoder_lstm_layer)
+    decoder_outputs = decoder_dense(decoder_outputs)
 
     # MODEL COMPILATION
 
@@ -62,9 +63,7 @@ def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding
     # Note that `decoder_target_data` needs to be one-hot encoded,
     # rather than sequences of integers like `decoder_input_data`!
 
-    decoder_input_data_zeros = zeros((787, 1, num_decoder_tokens))
-
-    model.fit([encoder_input_data, decoder_input_data_zeros], decoder_input_data,
+    model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
               batch_size=BATCH_SIZE, epochs=EPOCHS, validation_split=0.2)
 
     # INFERENCE MODEL
@@ -73,13 +72,12 @@ def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding
     encoder_model = Model(encoder_inputs, encoder_states)
 
     # Decoder
-    decoder_state_input_h = Input(shape=(num_decoder_tokens,))
-    decoder_state_input_c = Input(shape=(num_decoder_tokens,))
+    decoder_state_input_h = Input(shape=(LATENT_DIM,))
+    decoder_state_input_c = Input(shape=(LATENT_DIM,))
     decoder_states_inputs = [decoder_state_input_h, decoder_state_input_c]
-    decoder_lstm = LSTM(num_decoder_tokens, return_sequences=True, return_state=True)
     decoder_outputs, state_h, state_c = decoder_lstm(decoder_inputs, initial_state=decoder_states_inputs)
     decoder_states = [state_h, state_c]
-    decoder_outputs = Dense(num_decoder_tokens, activation='sigmoid')(decoder_outputs)
+    decoder_outputs = decoder_dense(decoder_outputs)
     decoder_model = Model(
         [decoder_inputs] + decoder_states_inputs,
         [decoder_outputs] + decoder_states)
