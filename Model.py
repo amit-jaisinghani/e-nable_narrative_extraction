@@ -5,8 +5,8 @@ from numpy import asarray, zeros
 
 def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding_file,
               encoder_input_data, decoder_input_data, decoder_target_data):
-    BATCH_SIZE = 4
-    EPOCHS = 12
+    BATCH_SIZE = 10
+    EPOCHS = 1
     LATENT_DIM = 100
 
     # GLOVE EMBEDDING
@@ -34,7 +34,7 @@ def get_model(num_encoder_tokens, num_decoder_tokens, tokenizer, glove_embedding
     # ENCODER MODEL
     # Define an input sequence and process it.
     encoder_inputs = Input(shape=(None,))
-    encoder_embedding_layer = Embedding(num_encoder_tokens, LATENT_DIM, weights=[embedding_matrix], trainable=False)(
+    encoder_embedding_layer = Embedding(num_encoder_tokens, LATENT_DIM)(
         encoder_inputs)
     encoder_lstm_layer, state_h, state_c = LSTM(LATENT_DIM, return_state=True)(encoder_embedding_layer)
     encoder_states = [state_h, state_c]

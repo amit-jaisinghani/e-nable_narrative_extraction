@@ -6,6 +6,7 @@ from keras.preprocessing.text import Tokenizer
 
 from Model import get_model
 from Preprocessing import get_train_validate_test_dataset
+from evaluate_model import evaluateModel
 
 
 def get_encoded_padded_content(tokenizer, content, max_length):
@@ -20,11 +21,12 @@ def get_encoded_padded_content(tokenizer, content, max_length):
 
 
 def get_decoder_inputs(label_data, num_decoder_tokens):
-    decoder_input_data = np.zeros((len(label_data), 2, num_decoder_tokens), dtype='float32')
-    decoder_target_data = np.zeros((len(label_data), 2, num_decoder_tokens), dtype='float32')
+    decoder_input_data = np.zeros((len(label_data), 3, num_decoder_tokens), dtype='float32')
+    decoder_target_data = np.zeros((len(label_data), 3, num_decoder_tokens), dtype='float32')
     for i, (input_data, target_data) in enumerate(zip(decoder_input_data, decoder_target_data)):
         input_data[0][0] = 1
         input_data[1] = label_data[i]
+        target_data[2][9] = 1
 
         target_data[0] = label_data[i]
         target_data[1][9] = 1
@@ -33,7 +35,7 @@ def get_decoder_inputs(label_data, num_decoder_tokens):
 
 
 # main script
-max_encoder_seq_length = 500
+max_encoder_seq_length = 1000
 num_decoder_tokens = 10
 
 # fetch data sets
@@ -49,6 +51,8 @@ num_encoder_tokens = len(tokenizer.word_index) + 1
 encoder_input_data = get_encoded_padded_content(tokenizer, training_dataset['content'], max_encoder_seq_length)
 decoder_input_data, decoder_target_data = get_decoder_inputs(training_dataset["labels"].values, num_decoder_tokens)
 
+# print(encoder_input_data.shape)
+# exit(-1)
 # print(encoder_input_data[0])
 # print(decoder_input_data[0])
 
@@ -57,7 +61,10 @@ model, encoder_model, decoder_model = get_model(num_encoder_tokens, num_decoder_
 
 
 encoder_input_test_data = get_encoded_padded_content(tokenizer, test_dataset['content'], max_encoder_seq_length)
-decoder_input_test_data, decoder_target_test_data = get_decoder_inputs(test_dataset["labels"].values, num_decoder_tokens)
+decoder_input_test_data, decoder_target_test_data = get_decoder_inputs(test_dataset["labels"].values,
+num_decoder_tokens)
+
+model_output = []
 
 
 def decode_sequence(seq_input):
@@ -88,6 +95,8 @@ def decode_sequence(seq_input):
         if sampled_token[0, 0, 9] > 0 or count > 1:
             stop_condition = True
 
+        if count == 1:
+            model_output.append(sampled_token[0][0])
         # Update the target sequence (of length 1).
         target_seq = sampled_token
 
@@ -95,10 +104,19 @@ def decode_sequence(seq_input):
         states_value = [h, c]
 
 
+ground_truth = []
 for seq_index in range(len(encoder_input_test_data)):
     # # Take one sequence (part of the training set)
     # # for trying out decoding.
     input_seq = encoder_input_test_data[seq_index: seq_index + 1]
+    ground_truth.append(decoder_input_test_data[seq_index][1])
     print("For Input", seq_index, ":")
     decode_sequence(input_seq)
     print("")
+
+print(model_output)
+print(ground_truth)
+
+print("Precision Recall Score")
+print("****************************************************************************************")
+evaluateModel(model_output, ground_truth)
